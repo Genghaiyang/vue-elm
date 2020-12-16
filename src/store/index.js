@@ -7,10 +7,12 @@ const SET_GOODS_ITEM_COUNT = "SET_GOODS_ITEM_COUNT";
 const SET_GOODS_ITEM_COUNT_LI = "SET_GOODS_ITEM_COUNT_LI";
 const SET_GOODS_ITEM_COUNT_LI_PLUS = "SET_GOODS_ITEM_COUNT_LI_PLUS";
 const SET_FOODS_WRAPPER_SCROLL_TO = "SET_FOODS_WRAPPER_SCROLL_TO";
+const SET_BLUR_BG_SHOW = "SET_BLUR_BG_SHOW";
 
 const state = {
   goodsItemCount: [],
-  FoodsWrapperScrollTo: 0
+  FoodsWrapperScrollTo: 0,
+  BlurBgShowTootle: false
 };
 const getters = {
   getGoodsCount: state => value => {
@@ -37,6 +39,9 @@ const mutations = {
   },
   [SET_FOODS_WRAPPER_SCROLL_TO](state, payload) {
     state.FoodsWrapperScrollTo = payload;
+  },
+  [SET_BLUR_BG_SHOW](state) {
+    state.BlurBgShowTootle = !state.BlurBgShowTootle;
   }
 };
 export default new Vuex.Store({

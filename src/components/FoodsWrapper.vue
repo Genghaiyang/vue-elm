@@ -140,7 +140,7 @@ export default {
 <style scoped lang="less">
 .foods-wrapper {
   flex: 1;
-  height: 100%;
+  height: 90%;
   overflow: hidden;
   ul {
     width: 100%;

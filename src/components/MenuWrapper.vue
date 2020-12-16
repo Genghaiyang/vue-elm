@@ -60,7 +60,7 @@ export default {
 .menu-wrapper {
   flex: none;
   width: 1.5rem;
-  height: 100%;
+  height: 90%;
   background-color: #f3f5f7;
   overflow: hidden;
   ul {
