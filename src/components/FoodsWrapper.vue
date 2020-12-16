@@ -64,22 +64,27 @@ import { mapState, mapMutations, mapGetters } from "vuex";
 export default {
   data() {
     return {
-      lineTitles: [
-        "linetitle0",
-        "linetitle0",
-        "linetitle0",
-        "linetitle0",
-        "linetitle0",
-        "linetitle0",
-        "linetitle0",
-        "linetitle0",
-        "linetitle0"
-      ]
+      WrapperslinetitleTopNum: [],
+      WrapperscrollTopNum: 0
     };
   },
   computed: {
     ...mapState(["goodsItemCount", "FoodsWrapperScrollTo"]),
-    ...mapGetters(["getGoodsCount"])
+    ...mapGetters(["getGoodsCount"]),
+    menuCurrentIndex() {
+      for (let i = 0, l = this.WrapperslinetitleTopNum.length; i < l; i++) {
+        let topHeight = this.WrapperslinetitleTopNum[i];
+        let bottomHeight = this.WrapperslinetitleTopNum[i + 1];
+        if (
+          !bottomHeight ||
+          (this.WrapperscrollTopNum >= topHeight &&
+            this.WrapperscrollTopNum < bottomHeight)
+        ) {
+          return i;
+        }
+      }
+      return 0;
+    }
   },
   props: ["seller"],
   methods: {
@@ -94,56 +99,25 @@ export default {
         click: true
       });
       this.bs.on("scroll", pos => {
-        if (-pos.y >= 0 && -pos.y < this.$refs.lineTitles[1].offsetTop) {
-          this.SET_FOODS_WRAPPER_SCROLL_TO(0);
-          console.log(-pos.y, 333, this.$refs.lineTitles[1].offsetTop);
-        } else if (
-          -pos.y >= this.$refs.lineTitles[1].offsetTop &&
-          -pos.y < this.$refs.lineTitles[2].offsetTop
-        ) {
-          this.SET_FOODS_WRAPPER_SCROLL_TO(1);
-          console.log(121);
-        } else if (
-          -pos.y >= this.$refs.lineTitles[2].offsetTop &&
-          -pos.y < this.$refs.lineTitles[3].offsetTop
-        ) {
-          this.SET_FOODS_WRAPPER_SCROLL_TO(2);
-        } else if (
-          -pos.y >= this.$refs.lineTitles[3].offsetTop &&
-          -pos.y < this.$refs.lineTitles[4].offsetTop
-        ) {
-          this.SET_FOODS_WRAPPER_SCROLL_TO(3);
-        } else if (
-          -pos.y >= this.$refs.lineTitles[4].offsetTop &&
-          -pos.y < this.$refs.lineTitles[5].offsetTop
-        ) {
-          this.SET_FOODS_WRAPPER_SCROLL_TO(4);
-        } else if (
-          -pos.y >= this.$refs.lineTitles[5].offsetTop &&
-          -pos.y < this.$refs.lineTitles[6].offsetTop
-        ) {
-          this.SET_FOODS_WRAPPER_SCROLL_TO(5);
-        } else if (
-          -pos.y >= this.$refs.lineTitles[6].offsetTop &&
-          -pos.y < this.$refs.lineTitles[7].offsetTop
-        ) {
-          this.SET_FOODS_WRAPPER_SCROLL_TO(6);
-        } else if (
-          -pos.y >= this.$refs.lineTitles[7].offsetTop &&
-          -pos.y < this.$refs.lineTitles[8].offsetTop
-        ) {
-          this.SET_FOODS_WRAPPER_SCROLL_TO(7);
-        } else {
-          this.SET_FOODS_WRAPPER_SCROLL_TO(8);
-        }
+        this.WrapperscrollTopNum = Math.abs(Math.round(pos.y));
       });
-      /* this.bs.on("scrollEnd", () => {
-        
-      }); */
     },
-    ScrollClickHandler(item) {
-      window.alert(item);
+    _calculateHeight() {
+      this.$refs.lineTitles.map(item => {
+        this.WrapperslinetitleTopNum.push(item.offsetTop);
+      });
+    },
+    scrollToElementPos(val) {
+      this.bs.scrollToElement(this.$refs.lineTitles[val], 400, false, false);
     }
+  },
+  created() {
+    this.$nextTick(() => {
+      this._calculateHeight(); // 初始化列表高度列表
+    });
+    this.$root.eventBus.$on("scrollfoodswrapper", val => {
+      this.scrollToElementPos(val);
+    });
   },
   mounted() {
     this.initScroll();
@@ -152,8 +126,11 @@ export default {
     this.bs.destroy();
   },
   watch: {
-    FoodsWrapperScrollTo: function(val) {
+    /* FoodsWrapperScrollTo: function(val) {
       this.bs.scrollToElement(this.$refs.lineTitles[val], 400, false, false);
+    }, */
+    menuCurrentIndex: function(i) {
+      this.SET_FOODS_WRAPPER_SCROLL_TO(i);
     }
   }
 };

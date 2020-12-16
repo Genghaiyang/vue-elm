@@ -9,6 +9,7 @@ Vue.use(Rate);
 Vue.config.productionTip = false;
 
 new Vue({
+  data: { eventBus: new Vue() }, //eventBus实现兄弟组件之间通信
   router,
   store,
   render: h => h(App)

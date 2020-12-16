@@ -4,7 +4,7 @@
       <li
         v-for="(item, index) in seller"
         :key="index"
-        @click="SET_FOODS_WRAPPER_SCROLL_TO(index)"
+        @click="emitFoodsWrapperScroll(index)"
         :class="{ active: FoodsWrapperScrollTo == index }"
       >
         <i v-if="item.type >= 0" :class="iconType[item.type]"></i
@@ -41,8 +41,9 @@ export default {
         /* console.log("scrollingEnd"); */
       });
     },
-    ScrollClickHandler(item) {
-      window.alert(item);
+    emitFoodsWrapperScroll(num) {
+      this.$root.eventBus.$emit("scrollfoodswrapper", num);
+      this.SET_FOODS_WRAPPER_SCROLL_TO(num);
     }
   },
   mounted() {
@@ -69,6 +70,9 @@ export default {
       padding: 0.25rem 0.2rem;
       line-height: 0;
       border-bottom: 1px solid rgb(206, 204, 204);
+      &:last-child {
+        border: 0;
+      }
       &.active {
         background-color: #fff;
       }
