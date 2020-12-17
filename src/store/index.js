@@ -8,6 +8,7 @@ const SET_GOODS_ITEM_COUNT_LI = "SET_GOODS_ITEM_COUNT_LI";
 const SET_GOODS_ITEM_COUNT_LI_PLUS = "SET_GOODS_ITEM_COUNT_LI_PLUS";
 const SET_FOODS_WRAPPER_SCROLL_TO = "SET_FOODS_WRAPPER_SCROLL_TO";
 const SET_BLUR_BG_SHOW = "SET_BLUR_BG_SHOW";
+const CLEAR_GOODS_LIST_EMPTY = "CLEAR_GOODS_LIST_EMPTY";
 
 const state = {
   goodsItemCount: [],
@@ -42,6 +43,13 @@ const mutations = {
   },
   [SET_BLUR_BG_SHOW](state) {
     state.BlurBgShowTootle = !state.BlurBgShowTootle;
+  },
+  [CLEAR_GOODS_LIST_EMPTY](state, payload) {
+    state.goodsItemCount.map(item => {
+      if (item.name === payload.name) {
+        item.count = 0;
+      }
+    });
   }
 };
 export default new Vuex.Store({

@@ -22,31 +22,62 @@
     >
       {{ payDesc }}
     </div>
-    <div class="shop-cart-list" v-show="BlurBgShowTootle">
-      <div class="list-head">
-        <span>购物车</span><span class="clear-cart">清空</span>
+    <transition name="slide">
+      <div class="shop-cart-list" v-show="BlurBgShowTootle">
+        <div class="list-head">
+          <span>购物车</span
+          ><span class="clear-cart" @click="clearGoodsListEmpty()">清空</span>
+        </div>
+        <div class="list-content" ref="scroll">
+          <ul>
+            <li v-for="(item, index) in selectGoodsList" :key="index">
+              <span class="name">{{ item.name }}</span>
+              <div class="count">
+                <div class="money">¥{{ item.count * item.price }}</div>
+                <div class="m-count" @click="handleCountM(item)">-</div>
+                <div class="countnum">{{ item.count }}</div>
+                <div class="p-count" @click="handleCountP(item)">＋</div>
+              </div>
+            </li>
+          </ul>
+        </div>
       </div>
-      <div class="list-content">
-        <ul>
-          <li v-for="(item, index) in selectGoodsList" :key="index">
-            <span class="name">{{ item.name }}</span>
-            <div class="count"></div>
-          </li>
-        </ul>
-      </div>
+    </transition>
+    <div class="drop-ball-box">
+      <transition
+        name="drop"
+        v-on:before-enter="beforeEnter"
+        v-on:enter="enter"
+        v-on:after-enter="afterEnter"
+        v-for="(ball, index) in balls"
+        :key="index"
+      >
+        <div class="ball" v-show="ball.show">
+          <div class="ball-inner"></div>
+        </div>
+      </transition>
     </div>
   </div>
 </template>
 
 <script>
+import BScroll from "@better-scroll/core";
 import { mapState, mapMutations } from "vuex";
 export default {
   data() {
-    return {};
+    return {
+      balls: [
+        { show: false },
+        { show: false },
+        { show: false },
+        { show: false },
+        { show: false }
+      ]
+    };
   },
   props: ["seller"],
   computed: {
-    ...mapState(["goodsItemCount", "BlurBgShowTootle"]),
+    ...mapState(["goodsItemCount", "BlurBgShowTootle", "BlurBgShowTootle"]),
     goodsItemfilter() {
       //商品去重
       return this.goodsItemCount.filter((x, index, self) => {
@@ -91,10 +122,102 @@ export default {
     }
   },
   methods: {
-    ...mapMutations(["SET_FOODS_WRAPPER_SCROLL_TO", "SET_BLUR_BG_SHOW"]),
+    ...mapMutations([
+      "SET_FOODS_WRAPPER_SCROLL_TO",
+      "SET_BLUR_BG_SHOW",
+      "SET_GOODS_ITEM_COUNT_LI",
+      "SET_GOODS_ITEM_COUNT_LI_PLUS",
+      "CLEAR_GOODS_LIST_EMPTY"
+    ]),
+
+    initScroll() {
+      this.bs = new BScroll(this.$refs.scroll, {
+        probeType: 3,
+        click: true
+      });
+    },
 
     handleLeftCartClick() {
       if (this.totalmoney > 0) {
+        this.SET_BLUR_BG_SHOW();
+      }
+    },
+
+    handleCountP(item) {
+      console.log(123);
+      this.SET_GOODS_ITEM_COUNT_LI({
+        name: item.name
+      });
+    },
+    handleCountM(item) {
+      this.SET_GOODS_ITEM_COUNT_LI_PLUS({
+        name: item.name
+      });
+    },
+    clearGoodsListEmpty() {
+      //清空商品列表
+      if (this.selectGoodsList.length > 0) {
+        this.selectGoodsList.map(item => {
+          this.CLEAR_GOODS_LIST_EMPTY({
+            name: item.name
+          });
+        });
+      }
+    },
+    beforeEnter(el) {
+      let count = this.balls.length;
+      while (count--) {
+        let ball = this.balls[count];
+        if (ball.show) {
+          /* let rect = ball.el.getBoundingClientRect(); */
+          let x = ball.event.clientX - 100;
+          let y = -ball.event.clientY - 100;
+          console.log(ball.event.clientX, -ball.event.clientY);
+          el.style.display = "";
+          el.style.webkitTransform = `translate3d(${x}px,${y}px,0)`;
+          el.style.transform = `translate3d(${x}px,${y}px,0)`;
+        }
+      }
+    },
+    enter(el) {
+      el.offsetHeight; // 触发浏览器重绘，offsetWidth、offsetTop等方法都可以触发
+      this.$nextTick(() => {
+        el.style.webkitTransform = "translate3d(0,0,0)";
+        el.style.transform = "translate3d(0,0,0)";
+      });
+    },
+    afterEnter() {
+      for (let i = 0, l = this.balls.length; i < l; i++) {
+        if (this.balls[i].show) {
+          this.balls[i].show = false;
+          return;
+        }
+      }
+    }
+  },
+  created() {
+    this.$root.eventBus.$on("dropBall", event => {
+      for (let i = 0, l = this.balls.length; i < l; i++) {
+        if (!this.balls[i].show) {
+          this.balls[i].show = true;
+          this.balls[i].event = event;
+          return;
+        }
+      }
+    });
+  },
+  mounted() {
+    this.initScroll();
+  },
+  updated() {
+    this.bs.refresh();
+  },
+  beforeDestroy() {
+    this.bs.destroy();
+  },
+  watch: {
+    selectGoodsList: function() {
+      if (this.selectGoodsList.length === 0 && this.BlurBgShowTootle) {
         this.SET_BLUR_BG_SHOW();
       }
     }
@@ -111,11 +234,11 @@ export default {
   left: 0;
   bottom: 0;
   z-index: 89;
-  background: #141d27;
   color: rgba(255, 255, 255, 0.4);
   display: flex;
   .left-cart {
     flex: 1;
+    background: #141d27;
     .cart-box {
       display: block;
       float: left;
@@ -229,11 +352,74 @@ export default {
           }
           .count {
             flex: none;
-            width: 2rem;
+            width: 2.5rem;
             height: 100%;
+            display: flex;
+            align-items: center;
+            .money {
+              color: red;
+              font-size: 0.3rem;
+              margin-right: 0.3rem;
+              width: 0.5rem;
+            }
+            .m-count,
+            .p-count {
+              width: 0.4rem;
+              height: 0.4rem;
+              margin: 0 0.2rem;
+              border-radius: 50%;
+            }
+            .m-count {
+              background: url(../assets/minus-bold.png) no-repeat center center
+                #026b92;
+              background-size: 100% 100%;
+            }
+            .p-count {
+              background: url(../assets/add-bold.png) no-repeat center center
+                #026b92;
+              background-size: 100% 100%;
+            }
+            .countnum {
+              font-size: 0.26rem;
+              color: #93999f;
+            }
           }
         }
       }
+    }
+  }
+  .slide-enter-active {
+    transition: all 0.4s ease;
+  }
+  .slide-leave-active {
+    transition: all 0.4s ease;
+  }
+  .slide-enter,
+  .slide-leave-to {
+    transform: translateY(0);
+  }
+  .slide-enter-to,
+  .slide-leave {
+    transform: translateY(-100%);
+  }
+  .drop-ball-box {
+    width: 0.8rem;
+    height: 0.8rem;
+    position: absolute;
+    left: 0.4rem;
+    bottom: 0.2rem;
+    .ball {
+      width: 0.4rem;
+      height: 0.4rem;
+      border-radius: 50%;
+      background: #f01414;
+      position: absolute;
+      left: 0.2rem;
+      bottom: 0.2rem;
+    }
+    .drop-enter,
+    .drop-enter-active {
+      transition: all 4s cubic-bezier(0.49, -0.29, 0.75, 0.41);
     }
   }
 }

@@ -43,11 +43,7 @@
               }}</span>
               <i
                 class="count-p"
-                @click="
-                  SET_GOODS_ITEM_COUNT_LI({
-                    name: itemfood.name
-                  })
-                "
+                @click="handlePlusButtonClick(itemfood, $event)"
                 >+</i
               >
             </div>
@@ -109,6 +105,12 @@ export default {
     },
     scrollToElementPos(val) {
       this.bs.scrollToElement(this.$refs.lineTitles[val], 400, false, false);
+    },
+    handlePlusButtonClick(item, event) {
+      this.SET_GOODS_ITEM_COUNT_LI({
+        name: item.name
+      });
+      this.$root.eventBus.$emit("dropBall", event);
     }
   },
   created() {
@@ -126,9 +128,6 @@ export default {
     this.bs.destroy();
   },
   watch: {
-    /* FoodsWrapperScrollTo: function(val) {
-      this.bs.scrollToElement(this.$refs.lineTitles[val], 400, false, false);
-    }, */
     menuCurrentIndex: function(i) {
       this.SET_FOODS_WRAPPER_SCROLL_TO(i);
     }
