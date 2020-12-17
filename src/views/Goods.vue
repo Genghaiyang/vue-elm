@@ -2,7 +2,7 @@
   <div class="goods">
     <MenuWrapper :seller="seller.goods" v-if="seller.goods"></MenuWrapper>
     <FoodsWrapper :seller="seller.goods" v-if="seller.goods"></FoodsWrapper>
-    <!-- <DetailWrapper v-if="Dshow"></DetailWrapper> -->
+    <DetailWrapper :seller="seller.goods" v-show="Dshow"></DetailWrapper>
     <ShopCart :seller="seller.seller" v-if="seller.seller"></ShopCart>
     <transition name="fade">
       <div
@@ -17,7 +17,7 @@
 <script>
 import MenuWrapper from "../components/MenuWrapper.vue";
 import FoodsWrapper from "../components/FoodsWrapper.vue";
-/* import DetailWrapper from "../components/DetailWrapper.vue" */
+import DetailWrapper from "../components/DetailWrapper.vue";
 import ShopCart from "../components/ShopCart.vue";
 import { mapState, mapMutations } from "vuex";
 export default {
@@ -25,7 +25,7 @@ export default {
   props: ["seller"],
   data() {
     return {
-      Dshow: false
+      Dshow: true
     };
   },
   computed: {
@@ -34,7 +34,7 @@ export default {
   components: {
     MenuWrapper,
     FoodsWrapper,
-    /* DetailWrapper,*/
+    DetailWrapper,
     ShopCart
   },
   methods: {

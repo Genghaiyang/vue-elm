@@ -144,7 +144,6 @@ export default {
     },
 
     handleCountP(item) {
-      console.log(123);
       this.SET_GOODS_ITEM_COUNT_LI({
         name: item.name
       });
@@ -170,12 +169,15 @@ export default {
         let ball = this.balls[count];
         if (ball.show) {
           /* let rect = ball.el.getBoundingClientRect(); */
-          let x = ball.event.clientX - 100;
-          let y = -ball.event.clientY - 100;
-          console.log(ball.event.clientX, -ball.event.clientY);
-          el.style.display = "";
-          el.style.webkitTransform = `translate3d(${x}px,${y}px,0)`;
-          el.style.transform = `translate3d(${x}px,${y}px,0)`;
+          let x = ball.event.clientX - 80;
+          let y = -(document.documentElement.clientHeight - ball.event.clientY);
+          console.log(ball.event.clientY, y);
+          /* el.style.display = ""; */
+          el.style.webkitTransform = `translate3d(0,${y}px,0)`;
+          el.style.transform = `translate3d(0,${y}px,0)`;
+          let inner = el.querySelector(".ball-inner");
+          inner.style.webkitTransform = `translate3d(${x}px,0,0)`;
+          inner.style.transform = `translate3d(${x}px,0,0)`;
         }
       }
     },
@@ -184,13 +186,16 @@ export default {
       this.$nextTick(() => {
         el.style.webkitTransform = "translate3d(0,0,0)";
         el.style.transform = "translate3d(0,0,0)";
+        let inner = el.querySelector(".ball-inner");
+        inner.style.webkitTransform = `translate3d(0,0,0)`;
+        inner.style.transform = `translate3d(0,0,0)`;
       });
     },
     afterEnter() {
       for (let i = 0, l = this.balls.length; i < l; i++) {
         if (this.balls[i].show) {
           this.balls[i].show = false;
-          return;
+          /* return; */
         }
       }
     }
@@ -408,18 +413,24 @@ export default {
     position: absolute;
     left: 0.4rem;
     bottom: 0.2rem;
+    z-index: -1;
     .ball {
       width: 0.4rem;
       height: 0.4rem;
-      border-radius: 50%;
-      background: #f01414;
       position: absolute;
       left: 0.2rem;
       bottom: 0.2rem;
+      .ball-inner {
+        width: 0.4rem;
+        height: 0.4rem;
+        border-radius: 50%;
+        background: #f01414;
+        transition: all 0.4s linear;
+      }
     }
     .drop-enter,
     .drop-enter-active {
-      transition: all 4s cubic-bezier(0.49, -0.29, 0.75, 0.41);
+      transition: all 0.4s cubic-bezier(0.49, -0.29, 0.75, 0.41);
     }
   }
 }
