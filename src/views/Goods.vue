@@ -25,7 +25,7 @@ export default {
   props: ["seller"],
   data() {
     return {
-      Dshow: true
+      Dshow: false
     };
   },
   computed: {
@@ -45,6 +45,11 @@ export default {
     handleLeftCartClick() {
       this.SET_BLUR_BG_SHOW();
     }
+  },
+  created() {
+    this.$root.eventBus.$on("showDetaiWrapper", () => {
+      this.Dshow = true;
+    });
   }
 };
 </script>

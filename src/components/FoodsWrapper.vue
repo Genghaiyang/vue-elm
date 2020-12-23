@@ -7,6 +7,7 @@
           class="food-item"
           v-for="(itemfood, indexfood) in item.foods"
           :key="indexfood"
+          @click="handleFoodListClick()"
         >
           <div class="pic">
             <img :src="itemfood.image" alt="" width="100%" />
@@ -30,7 +31,7 @@
                 <i
                   class="count-m"
                   v-show="getGoodsCount(itemfood.name) > 0"
-                  @click="
+                  @click.stop.prevent="
                     SET_GOODS_ITEM_COUNT_LI_PLUS({
                       name: itemfood.name
                     })
@@ -43,7 +44,7 @@
               }}</span>
               <i
                 class="count-p"
-                @click="handlePlusButtonClick(itemfood, $event)"
+                @click.stop.prevent="handlePlusButtonClick(itemfood, $event)"
                 >+</i
               >
             </div>
@@ -111,6 +112,9 @@ export default {
         name: item.name
       });
       this.$root.eventBus.$emit("dropBall", event);
+    },
+    handleFoodListClick(item, event) {
+      this.$root.eventBus.$emit("showDetaiWrapper", event);
     }
   },
   created() {
