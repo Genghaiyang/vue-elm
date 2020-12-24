@@ -2,7 +2,7 @@
   <div class="goods">
     <MenuWrapper :seller="seller.goods" v-if="seller.goods"></MenuWrapper>
     <FoodsWrapper :seller="seller.goods" v-if="seller.goods"></FoodsWrapper>
-    <DetailWrapper :seller="seller.goods" v-show="Dshow"></DetailWrapper>
+    <DetailWrapper :seller="seller.goods"></DetailWrapper>
     <ShopCart :seller="seller.seller" v-if="seller.seller"></ShopCart>
     <transition name="fade">
       <div
@@ -24,9 +24,7 @@ export default {
   name: "Goods",
   props: ["seller"],
   data() {
-    return {
-      Dshow: false
-    };
+    return {};
   },
   computed: {
     ...mapState(["BlurBgShowTootle"])
@@ -45,11 +43,6 @@ export default {
     handleLeftCartClick() {
       this.SET_BLUR_BG_SHOW();
     }
-  },
-  created() {
-    this.$root.eventBus.$on("showDetaiWrapper", () => {
-      this.Dshow = true;
-    });
   }
 };
 </script>

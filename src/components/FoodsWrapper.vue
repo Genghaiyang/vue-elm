@@ -7,7 +7,7 @@
           class="food-item"
           v-for="(itemfood, indexfood) in item.foods"
           :key="indexfood"
-          @click="handleFoodListClick()"
+          @click="handleFoodListClick(itemfood)"
         >
           <div class="pic">
             <img :src="itemfood.image" alt="" width="100%" />
@@ -113,8 +113,8 @@ export default {
       });
       this.$root.eventBus.$emit("dropBall", event);
     },
-    handleFoodListClick(item, event) {
-      this.$root.eventBus.$emit("showDetaiWrapper", event);
+    handleFoodListClick(item) {
+      this.$root.eventBus.$emit("showDetaiWrapper", item);
     }
   },
   created() {
