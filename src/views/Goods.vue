@@ -2,7 +2,9 @@
   <div class="goods">
     <MenuWrapper :seller="seller.goods" v-if="seller.goods"></MenuWrapper>
     <FoodsWrapper :seller="seller.goods" v-if="seller.goods"></FoodsWrapper>
-    <DetailWrapper :seller="seller.goods"></DetailWrapper>
+    <keep-alive
+      ><DetailWrapper :seller="seller.goods"></DetailWrapper
+    ></keep-alive>
     <ShopCart :seller="seller.seller" v-if="seller.seller"></ShopCart>
     <transition name="fade">
       <div

@@ -2,12 +2,9 @@
   <transition name="move">
     <section class="food-detail-page" ref="detailscroll" v-show="Dshow">
       <div class="food-content">
+        <div class="return-btn" @click="handleClickReturnbtn()"></div>
         <section class="food-banner">
-          <img
-            src="http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/750/h/750"
-            alt=""
-            width="100%"
-          />
+          <img :src="foodItem.image" alt="" width="100%" />
         </section>
 
         <div class="food-all">
@@ -18,13 +15,19 @@
           <div class="count">
             <div class="money">¥{{ foodItem.price }}</div>
 
-            <div class="rightbox">
-              <div class="addcart">加入购物车</div>
-              <div class="countbox" style="display:none;">
-                <div class="m-count">-</div>
-                <div class="countnum">10</div>
-                <div class="p-count">＋</div>
+            <div class="rightbox" v-if="foodItem.name">
+              <div
+                class="addcart"
+                v-show="getGoodsCount(foodItem.name) == 0"
+                @click="handleAddCartClick(foodItem, $event)"
+              >
+                加入购物车
               </div>
+              <shop-count
+                :itemfood="foodItem"
+                ref="shopCount"
+                v-show="getGoodsCount(foodItem.name) > 0"
+              ></shop-count>
             </div>
           </div>
         </div>
@@ -38,17 +41,32 @@
           <div class="title">商品评价</div>
           <div class="good-tab-box">
             <ul>
-              <li class="tab">全部2</li>
-              <li>推荐2</li>
-              <li>吐槽0</li>
+              <li
+                :class="{ tab: ratingsShowType === 1 }"
+                @click="toogleRatingsShowType(1)"
+              >
+                全部{{ foodRatingsItemCount[0] }}
+              </li>
+              <li
+                :class="{ tab: ratingsShowType === 2 }"
+                @click="toogleRatingsShowType(2)"
+              >
+                推荐{{ foodRatingsItemCount[1] }}
+              </li>
+              <li
+                :class="{ tab: ratingsShowType === 3 }"
+                @click="toogleRatingsShowType(3)"
+              >
+                吐槽{{ foodRatingsItemCount[2] }}
+              </li>
             </ul>
           </div>
-          <div class="tootleline">
-            <span class="active"></span>只看有内容的评价
+          <div class="tootleline" @click="toogleShowHasTextrating()">
+            <span :class="{ active: showHasTextrating }"></span>只看有内容的评价
           </div>
           <div class="msg-box">
             <ul>
-              <li v-for="(item, index) in ratingsItem" :key="index">
+              <li v-for="(item, index) in foodRatingsItem" :key="index">
                 <p class="line1">
                   <span class="time">{{ item.rateTime | time }}</span
                   ><span class="avatar"><img :src="item.avatar"/></span
@@ -70,53 +88,60 @@
 <script>
 import BScroll from "@better-scroll/core";
 import moment from "moment";
+import ShopCount from "../components/ShopCount.vue";
+import { mapGetters } from "vuex";
 export default {
   props: ["seller"],
+  components: {
+    ShopCount
+  },
   data() {
     return {
       Dshow: false,
       foodItem: {},
       ratingsShowType: 1,
-      showHasTextrating: 1
+      showHasTextrating: false
     };
   },
   computed: {
-    ratingsItem() {
-      let outItem = [];
-      let outItem2 = [];
-      switch (this.ratingsShowType) {
-        case 1:
-          outItem = this.foodItem.ratings;
-          break;
-        case 2:
-          outItem = this.foodItem.ratings.filter(item => item.rateType == 0);
-          break;
-        case 3:
-          outItem = this.foodItem.ratings.filter(item => item.rateType == 1);
-          break;
-        default:
-          outItem = null;
-      }
-      if (this.showHasTextrating) {
-        /* return outItem.filter(item => item.text != ""); */
-        console.log(typeof outItem, outItem);
-        /* outItem.map(item => {
-          if (item.text != "") {
-            outItem2.push(item);
-          }
-        }); */
-        return outItem2;
+    ...mapGetters(["getGoodsCount"]),
+    foodRatingsItem() {
+      if (this.foodItem.ratings) {
+        let outItem = [];
+
+        switch (this.ratingsShowType) {
+          case 1:
+            outItem = this.foodItem.ratings;
+            break;
+          case 2:
+            outItem = this.foodItem.ratings.filter(item => item.rateType == 0);
+            break;
+          case 3:
+            outItem = this.foodItem.ratings.filter(item => item.rateType == 1);
+            break;
+          default:
+            outItem = null;
+        }
+        if (this.showHasTextrating) {
+          return outItem.filter(item => item.text != "");
+        } else {
+          return outItem;
+        }
       } else {
-        return outItem;
+        return [];
+      }
+    },
+    foodRatingsItemCount() {
+      if (this.foodItem.ratings) {
+        return [
+          this.foodItem.ratings.length,
+          this.foodItem.ratings.filter(item => item.rateType == 0).length,
+          this.foodItem.ratings.filter(item => item.rateType == 1).length
+        ];
+      } else {
+        return [0, 0, 0];
       }
     }
-    /* ratingsItemfilter() {
-      if (this.showHasTextrating) {
-        return this.ratingsItem.filter(item => item.text != "");
-      } else {
-        return this.ratingsItem;
-      }
-    } */
   },
   filters: {
     time: function(value, formatString) {
@@ -130,6 +155,18 @@ export default {
         probeType: 3,
         click: true
       });
+    },
+    toogleRatingsShowType(num) {
+      this.ratingsShowType = num;
+    },
+    toogleShowHasTextrating() {
+      this.showHasTextrating = !this.showHasTextrating;
+    },
+    handleClickReturnbtn() {
+      this.Dshow = false;
+    },
+    handleAddCartClick(item, event) {
+      this.$refs.shopCount.handlePlusButtonClick(item, event);
     }
   },
   created() {
@@ -176,6 +213,16 @@ export default {
 
   .food-content {
     width: 100%;
+    .return-btn {
+      width: 0.6rem;
+      height: 0.6rem;
+      position: absolute;
+      top: 0.2rem;
+      left: 0.2rem;
+      z-index: 100;
+      background: url(../assets/arrow-left-bold.png) no-repeat center
+        center/100% 100%;
+    }
   }
   .food-banner {
     width: 100%;
@@ -214,6 +261,7 @@ export default {
         width: 1.8rem;
         justify-content: space-between;
         align-items: center;
+        position: relative;
         .addcart {
           width: 100%;
           height: 0.5rem;
@@ -283,6 +331,10 @@ export default {
           }
           &.tab {
             background: #00a9dc;
+            color: #fff;
+          }
+          &:last-child.tab {
+            background: #4d555d;
             color: #fff;
           }
         }

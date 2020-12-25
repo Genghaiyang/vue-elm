@@ -26,7 +26,8 @@
                 >¥{{ itemfood.oldPrice }}</span
               >
             </p>
-            <div class="food-count">
+            <shop-count :itemfood="itemfood"></shop-count>
+            <!-- <div class="food-count">
               <transition name="rotate-icon">
                 <i
                   class="count-m"
@@ -47,7 +48,7 @@
                 @click.stop.prevent="handlePlusButtonClick(itemfood, $event)"
                 >+</i
               >
-            </div>
+            </div> -->
           </div>
         </section>
       </li>
@@ -58,6 +59,7 @@
 <script>
 import BScroll from "@better-scroll/core";
 import { mapState, mapMutations, mapGetters } from "vuex";
+import ShopCount from "../components/ShopCount.vue";
 export default {
   data() {
     return {
@@ -84,6 +86,9 @@ export default {
     }
   },
   props: ["seller"],
+  components: {
+    ShopCount
+  },
   methods: {
     ...mapMutations([
       "SET_GOODS_ITEM_COUNT_LI",
@@ -126,7 +131,9 @@ export default {
     });
   },
   mounted() {
-    this.initScroll();
+    this.$nextTick(() => {
+      this.initScroll();
+    });
   },
   beforeDestroy() {
     this.bs.destroy();

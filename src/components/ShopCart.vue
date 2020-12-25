@@ -34,9 +34,12 @@
               <span class="name">{{ item.name }}</span>
               <div class="count">
                 <div class="money">¥{{ item.count * item.price }}</div>
-                <div class="m-count" @click="handleCountM(item)">-</div>
+                <!-- <div class="m-count" @click="handleCountM(item)">-</div>
                 <div class="countnum">{{ item.count }}</div>
-                <div class="p-count" @click="handleCountP(item)">＋</div>
+                <div class="p-count" @click="handleCountP(item)">＋</div> -->
+                <div class="shop-count-right">
+                  <shop-count :itemfood="item"></shop-count>
+                </div>
               </div>
             </li>
           </ul>
@@ -63,6 +66,7 @@
 <script>
 import BScroll from "@better-scroll/core";
 import { mapState, mapMutations } from "vuex";
+import ShopCount from "../components/ShopCount.vue";
 export default {
   data() {
     return {
@@ -76,6 +80,9 @@ export default {
     };
   },
   props: ["seller"],
+  components: {
+    ShopCount
+  },
   computed: {
     ...mapState(["goodsItemCount", "BlurBgShowTootle", "BlurBgShowTootle"]),
     goodsItemfilter() {
@@ -171,7 +178,6 @@ export default {
           /* let rect = ball.el.getBoundingClientRect(); */
           let x = ball.event.clientX - 80;
           let y = -(document.documentElement.clientHeight - ball.event.clientY);
-          console.log(ball.event.clientY, y);
           /* el.style.display = ""; */
           el.style.webkitTransform = `translate3d(0,${y}px,0)`;
           el.style.transform = `translate3d(0,${y}px,0)`;
@@ -361,11 +367,18 @@ export default {
             height: 100%;
             display: flex;
             align-items: center;
+            justify-content: space-between;
             .money {
               color: red;
               font-size: 0.3rem;
               margin-right: 0.3rem;
               width: 0.5rem;
+            }
+            .shop-count-right {
+              width: 1rem;
+              height: 0.32rem;
+              position: relative;
+              float: right;
             }
             .m-count,
             .p-count {
