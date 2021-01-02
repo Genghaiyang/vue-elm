@@ -1,7 +1,7 @@
 <template>
   <div class="foods-wrapper" ref="scroll">
     <ul>
-      <li v-for="(item, index) in seller" :key="index">
+      <li v-for="(item, index) in foodsSeller" :key="index">
         <p class="line-titles" ref="lineTitles">{{ item.name }}</p>
         <section
           class="food-item"
@@ -64,7 +64,8 @@ export default {
   data() {
     return {
       WrapperslinetitleTopNum: [],
-      WrapperscrollTopNum: 0
+      WrapperscrollTopNum: 0,
+      foodsSeller: this.seller
     };
   },
   computed: {
@@ -120,6 +121,27 @@ export default {
     },
     handleFoodListClick(item) {
       this.$root.eventBus.$emit("showDetaiWrapper", item);
+    },
+    updatedImg() {
+      //解决better-scroll因为图片没有下载完导致的滚动条高度不够，无法浏览全部内容的问题。
+      //原因是better-scroll初始化是在dom加载后执行，此时图片没有下载完成，导致滚动条高度计算不准确。
+      //利用图片的complete属性进行判断，当所有图片下载完成后再对scroll重新计算。
+      let img = document
+        .getElementsByClassName("foods-wrapper")[0]
+        .getElementsByTagName("img");
+      let count = 0;
+      let length = img.length;
+      if (length) {
+        let timer = setInterval(() => {
+          if (count == length) {
+            // console.log('refresh')
+            this.bs.refresh();
+            clearInterval(timer);
+          } else if (img[count].complete) {
+            count++;
+          }
+        }, 100);
+      }
     }
   },
   created() {
@@ -133,6 +155,8 @@ export default {
   mounted() {
     this.$nextTick(() => {
       this.initScroll();
+      console.log(this.bs);
+      this.updatedImg();
     });
   },
   beforeDestroy() {
@@ -141,6 +165,10 @@ export default {
   watch: {
     menuCurrentIndex: function(i) {
       this.SET_FOODS_WRAPPER_SCROLL_TO(i);
+    },
+    foodsSeller: function() {
+      this.bs.refresh();
+      console.log("refresh!");
     }
   }
 };
