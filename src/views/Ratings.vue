@@ -1,5 +1,5 @@
 <template>
-  <div class="ratings-box">
+  <div class="ratings-box" ref="ratingscroll">
     <div class="rating-content">
       <div class="rating-info" v-if="seller.seller">
         <div class="mark">
@@ -54,21 +54,32 @@
       <div class="food-msg-box">
         <div class="good-tab-box">
           <ul>
-            <li :class="{ tab: ratingsShowType === 1 }">
+            <li
+              :class="{ tab: ratingsShowType === 1 }"
+              @click="toogleRatingsShowType(1)"
+            >
               全部{{ foodRatingsItemCount[0] }}
             </li>
-            <li :class="{ tab: ratingsShowType === 2 }">
+            <li
+              :class="{ tab: ratingsShowType === 2 }"
+              @click="toogleRatingsShowType(2)"
+            >
               推荐{{ foodRatingsItemCount[1] }}
             </li>
-            <li :class="{ tab: ratingsShowType === 3 }">
+            <li
+              :class="{ tab: ratingsShowType === 3 }"
+              @click="toogleRatingsShowType(3)"
+            >
               吐槽{{ foodRatingsItemCount[2] }}
             </li>
           </ul>
         </div>
-        <div class="tootleline"><span></span>只看有内容的评价</div>
+        <div class="tootleline" @click="toogleShowHasTextrating()">
+          <span :class="{ active: showHasTextrating }"></span>只看有内容的评价
+        </div>
         <div class="msg-box" v-if="seller.ratings">
           <ul>
-            <li v-for="(item, index) in seller.ratings" :key="index">
+            <li v-for="(item, index) in foodRatingsItem" :key="index">
               <div class="left">
                 <span class="avatar"><img :src="item.avatar"/></span>
               </div>
@@ -81,6 +92,14 @@
                   <i :class="['icon', { iconbad: item.rateType == 1 }]"></i
                   >{{ item.text }}
                 </p>
+                <p class="line3">
+                  <span
+                    class="dish"
+                    v-for="(item, index) in item.recommend"
+                    :key="index"
+                    >{{ item }}</span
+                  >
+                </p>
               </div>
             </li>
           </ul>
@@ -91,6 +110,7 @@
 </template>
 
 <script>
+import BScroll from "@better-scroll/core";
 import moment from "moment";
 /* import { mapState, mapMutations } from "vuex"; */
 export default {
@@ -99,7 +119,8 @@ export default {
   data() {
     return {
       /*       RatingsList: this.seller.ratings, */
-      ratingsShowType: 1
+      ratingsShowType: 1,
+      showHasTextrating: false
     };
   },
   computed: {
@@ -113,6 +134,32 @@ export default {
       } else {
         return [0, 0, 0];
       }
+    },
+    foodRatingsItem() {
+      if (this.seller.ratings) {
+        let outItem = [];
+
+        switch (this.ratingsShowType) {
+          case 1:
+            outItem = this.seller.ratings;
+            break;
+          case 2:
+            outItem = this.seller.ratings.filter(item => item.rateType == 0);
+            break;
+          case 3:
+            outItem = this.seller.ratings.filter(item => item.rateType == 1);
+            break;
+          default:
+            outItem = null;
+        }
+        if (this.showHasTextrating) {
+          return outItem.filter(item => item.text != "");
+        } else {
+          return outItem;
+        }
+      } else {
+        return [];
+      }
     }
   },
   components: {},
@@ -122,7 +169,29 @@ export default {
       return moment(value).format(formatString);
     }
   },
-  methods: {}
+  methods: {
+    toogleRatingsShowType(num) {
+      this.ratingsShowType = num;
+    },
+    toogleShowHasTextrating() {
+      this.showHasTextrating = !this.showHasTextrating;
+    }
+  },
+  mounted() {
+    this.$nextTick(() => {
+      this.bs = new BScroll(this.$refs.ratingscroll, {
+        probeType: 3,
+        click: true
+      });
+      console.log(this.bs);
+    });
+  },
+  updated() {
+    this.bs.refresh();
+  },
+  beforeDestroy() {
+    this.bs.destroy();
+  }
 };
 </script>
 
@@ -132,12 +201,14 @@ export default {
   position: absolute;
   top: 3.3rem;
   bottom: 0;
-  display: flex;
+  left: 0;
   z-index: 990;
+  overflow: hidden;
   .rating-content {
     width: 100%;
     overflow: hidden;
     font-size: 0.26rem;
+    height: auto;
     .rating-info {
       width: 100%;
       height: 2rem;
@@ -267,11 +338,13 @@ export default {
       }
       .msg-box {
         width: 100%;
+        overflow: hidden;
         ul {
           margin: 0;
           overflow: hidden;
           border-top: 1px solid rgba(7, 17, 27, 0.1);
           margin-bottom: 1rem;
+          width: 100%;
           li {
             padding: 0.2rem 0;
             border-bottom: 1px solid rgba(7, 17, 27, 0.1);
@@ -324,6 +397,18 @@ export default {
                 .iconbad {
                   background: url(../assets/bad.png) no-repeat center
                     center/100% 100%;
+                }
+              }
+              .line3 {
+                width: 100%;
+                margin: 0.1rem 0;
+                .dish {
+                  display: inline-block;
+                  padding: 0.02rem 0.05rem;
+                  border: 1px solid rgba(7, 17, 27, 0.1);
+                  font-size: 0.24rem;
+                  color: #93999f;
+                  margin: 0.1rem;
                 }
               }
             }

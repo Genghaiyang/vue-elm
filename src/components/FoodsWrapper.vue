@@ -21,9 +21,9 @@
               月售{{ itemfood.sellCount }}份 好评率{{ itemfood.rating }}%
             </p>
             <p class="price">
-              ¥{{ itemfood.price }}
+              &yen;{{ itemfood.price }}
               <span v-if="itemfood.oldPrice !== ''"
-                >¥{{ itemfood.oldPrice }}</span
+                >&yen;{{ itemfood.oldPrice }}</span
               >
             </p>
             <shop-count :itemfood="itemfood"></shop-count>
@@ -123,9 +123,9 @@ export default {
       this.$root.eventBus.$emit("showDetaiWrapper", item);
     },
     updatedImg() {
-      //解决better-scroll因为图片没有下载完导致的滚动条高度不够，无法浏览全部内容的问题。
-      //原因是better-scroll初始化是在dom加载后执行，此时图片没有下载完成，导致滚动条高度计算不准确。
-      //利用图片的complete属性进行判断，当所有图片下载完成后再对scroll重新计算。
+      //解决better-scroll因为图片没有下载完导致的滚动条高度不够，无法浏览全部内容的问题�?
+      //原因是better-scroll初始化是在dom加载后执行，此时图片没有下载完成，导致滚动条高度计算不准确�?
+      //利用图片的complete属性进行判断，当所有图片下载完成后再对scroll重新计算�?
       let img = document
         .getElementsByClassName("foods-wrapper")[0]
         .getElementsByTagName("img");
@@ -146,7 +146,7 @@ export default {
   },
   created() {
     this.$nextTick(() => {
-      this._calculateHeight(); // 初始化列表高度列表
+      this._calculateHeight(); // 初始化列表高度列�?
     });
     this.$root.eventBus.$on("scrollfoodswrapper", val => {
       this.scrollToElementPos(val);
